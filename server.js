@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const express = require("express");
 const connectDB = require("./config/db");
-const conntecDB = require("./config/db");
 const passport = require("passport");
 const passportLocal = require("passport-local");
 const cookieParser = require("cookie-parser");
@@ -13,10 +12,12 @@ const cors = require("cors");
 
 const User = require("./models/User");
 const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("./routes/authRoutes");
 const app = express();
 connectDB();
 
 const PORT = process.env.PORT || 4000;
+const SECRET_PASSPORT = process.env.SECRET_PASSPORT;
 
 // Middleware
 app.use(bodyParser.json());
@@ -30,59 +31,20 @@ app.use(
 
 app.use(
     session({
-        secret: "euler",
+        secret: SECRET_PASSPORT,
         resave: true,
         saveUninitialized: true,
     })
 );
-app.use(cookieParser("euler"));
+app.use(cookieParser(SECRET_PASSPORT));
 app.use(passport.initialize());
 app.use(passport.session());
 require("./config/passportConfig")(passport);
 
 // Routes
-
-// allows /routes/userRoutes to proceed
 app.use("/api/users", userRoutes);
 
-app.post("/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
-        if (err) {
-            throw err;
-        } else if (!user) {
-            res.send("No User Exists");
-        } else {
-            req.logIn(user, (err) => {
-                res.send("Successfully Authenticated");
-                console.log(req.user);
-            });
-        }
-    })(req, res, next);
-});
-
-app.post("/register", (req, res) => {
-    User.findOne({ username: req.body.username }, async (err, doc) => {
-        if (err) {
-            throw error;
-        } else if (doc) {
-            res.send("User Alreadt Exists");
-        } else if (!doc) {
-            const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
-            const newUser = new User({
-                username: req.body.username,
-                password: hashedPassword,
-            });
-
-            await newUser.save;
-            res.send("User Created");
-        }
-    });
-});
-
-app.get("/user", (req, res) => {
-    res.send(req.user);
-});
+app.use("/api/auth", authRoutes);
 
 // Start server
 app.listen(PORT, () => {
