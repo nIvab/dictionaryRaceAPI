@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const passport = require("passport");
+const bcrypt = require("bcrypt");
 
 const login = (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
@@ -28,11 +29,13 @@ const register = (req, res) => {
 
             const newUser = new User({
                 username: req.body.username,
+                email: req.body.email,
                 password: hashedPassword,
             });
 
-            await newUser.save;
+            await newUser.save();
             res.send("User Created");
+            console.log(req.body);
         }
     });
 };

@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
     cors({
-        origin: "http://localhost::3000", // react app
+        origin: "http://localhost:3000", // react app
         credentials: true,
     })
 );
