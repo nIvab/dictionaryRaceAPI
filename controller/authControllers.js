@@ -3,22 +3,28 @@ const passport = require("passport");
 const bcrypt = require("bcrypt");
 
 const login = (req, res, next) => {
+    console.log("_______LOGIN CALLED________");
     passport.authenticate("local", (err, user, info) => {
         if (err) {
-            throw err;
+            console.log(err);
+            return next(err);
         } else if (!user) {
+            console.log("___NO USER");
             res.send("No User Exists");
-            res.redirect("/login");
-        } else {
-            req.logIn(user, (err) => {
-                res.send("Successfully Authenticated");
-                console.log(req.user);
-            });
         }
+        req.logIn(user, (err) => {
+            if (err) {
+                console.log(err);
+                return next(err);
+            }
+            console.log("___SUCCESSFULLY AUTHENTICATED_____");
+            res.send("Successfully Authenticated");
+        });
     })(req, res, next);
 };
 
 const register = (req, res) => {
+    console.log("______REGISTER CALLED______");
     User.findOne({ username: req.body.username }, async (err, doc) => {
         if (err) {
             throw error;
